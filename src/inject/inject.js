@@ -48,6 +48,7 @@ function redraw() {
   
 	context.strokeStyle = '#df4b26';
 	context.lineJoin = 'round';
+	context.lineCap = 'round';
 	context.lineWidth = 5;
 			
 	for(var i = 0; i < clickX.length; i++) {	
@@ -64,17 +65,11 @@ function redraw() {
 }
 
 function draw() {
-	context.strokeStyle = '#df4b26';
-	context.lineJoin = 'round';
-	context.lineWidth = 5;
-
-	context.beginPath();
 	if(clickDrag[clickX.length - 1])
 		context.moveTo(clickX[clickX.length - 2], clickY[clickY.length - 2]);
 	else
 		context.moveTo(clickX[clickX.length - 1] - 1, clickY[clickY.length - 1]);
 	context.lineTo(clickX[clickX.length - 1], clickY[clickY.length - 1]);
-	context.closePath();
 	context.stroke();
 }
 
@@ -88,6 +83,12 @@ function addClick(x, y, dragging)
 function initCanvasEvents() {
 	var $canvas = $(canvas);
 
+	// init canvas styles
+	context.strokeStyle = '#df4b26';
+	context.lineJoin = 'round';
+	context.lineCap = 'round';
+	context.lineWidth = 5;
+
 	$canvas.mousedown(function(e){
 		var mouseX = e.pageX - this.offsetLeft;
 		var mouseY = e.pageY - this.offsetTop;
@@ -100,7 +101,8 @@ function initCanvasEvents() {
 	$canvas.mousemove(function(e){
 		if(paint){
 			addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
-			draw();
+			context.lineTo(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+			context.stroke();
 		}
 	});
 	
