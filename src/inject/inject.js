@@ -44,13 +44,7 @@ var clickDrag = [];
 var paint;
 
 function redraw() {
-	context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
-  
-	context.strokeStyle = '#df4b26';
-	context.lineJoin = 'round';
-	context.lineCap = 'round';
-	context.lineWidth = 5;
-			
+	//context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
 	for(var i = 0; i < clickX.length; i++) {	
 		context.beginPath();
 		if(clickDrag[i] && i){
@@ -89,7 +83,16 @@ function initCanvasEvents() {
 	context.lineCap = 'round';
 	context.lineWidth = 5;
 
-	$canvas.mousedown(function(e){
+	// draw any annotations stored in localStorage
+	var drawObj = store.get(location.href);
+	if(drawObj !== undefined) {
+		clickX = drawObj.clickX;
+		clickY = drawObj.clickY;
+		clickDrag = drawObj.clickDrag;
+		redraw();
+	}
+
+	$canvas.mousedown(function(e) {
 		var mouseX = e.pageX - this.offsetLeft;
 		var mouseY = e.pageY - this.offsetTop;
 
@@ -98,7 +101,7 @@ function initCanvasEvents() {
 		draw();
 	});
 
-	$canvas.mousemove(function(e){
+	$canvas.mousemove(function(e) {
 		if(paint){
 			addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
 			context.lineTo(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
@@ -108,9 +111,11 @@ function initCanvasEvents() {
 	
 	$canvas.mouseup(function(e){
 		paint = false;
+		store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag});
 	});
 	
 	$canvas.mouseleave(function(e){
 		paint = false;
+		store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag});
 	});
 }

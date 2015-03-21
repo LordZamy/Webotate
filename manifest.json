@@ -41,7 +41,8 @@
       ],
       "js": [
         "src/inject/inject.js",
-        "src/inject/jquery-2.1.3.js"
+        "src/inject/jquery-2.1.3.js",
+        "src/inject/store.min.js"
       ]
     }
   ]
