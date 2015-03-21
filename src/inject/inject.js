@@ -15,6 +15,7 @@ chrome.extension.sendMessage({}, function(response) {
 		canvas.style.backgroundColor = 'transparent';
 		canvas.style.position = 'absolute';
 		canvas.style.zIndex = 9001;
+		canvas.style.cursor = 'crosshair';
 		// initially canvas is display: none
 		canvas.style.display = 'none';
 		$('body').prepend(canvas);
@@ -37,19 +38,19 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	}
 });
 
-var clickX = new Array();
-var clickY = new Array();
-var clickDrag = new Array();
+var clickX = [];
+var clickY = [];
+var clickDrag = [];
 var paint;
 
-function redraw(){
+function redraw() {
 	context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
   
-	context.strokeStyle = "#df4b26";
-	context.lineJoin = "round";
+	context.strokeStyle = '#df4b26';
+	context.lineJoin = 'round';
 	context.lineWidth = 5;
 			
-	for(var i=0; i < clickX.length; i++) {		
+	for(var i = 0; i < clickX.length; i++) {	
 		context.beginPath();
 		if(clickDrag[i] && i){
 			context.moveTo(clickX[i-1], clickY[i-1]);
@@ -60,6 +61,21 @@ function redraw(){
 		context.closePath();
 		context.stroke();
 	}
+}
+
+function draw() {
+	context.strokeStyle = '#df4b26';
+	context.lineJoin = 'round';
+	context.lineWidth = 5;
+
+	context.beginPath();
+	if(clickDrag[clickX.length - 1])
+		context.moveTo(clickX[clickX.length - 2], clickY[clickY.length - 2]);
+	else
+		context.moveTo(clickX[clickX.length - 1] - 1, clickY[clickY.length - 1]);
+	context.lineTo(clickX[clickX.length - 1], clickY[clickY.length - 1]);
+	context.closePath();
+	context.stroke();
 }
 
 function addClick(x, y, dragging)
@@ -78,13 +94,13 @@ function initCanvasEvents() {
 
 		paint = true;
 		addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
-		redraw();
+		draw();
 	});
 
 	$canvas.mousemove(function(e){
 		if(paint){
 			addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
-			redraw();
+			draw();
 		}
 	});
 	
