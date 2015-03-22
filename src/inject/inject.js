@@ -14,7 +14,7 @@ chrome.extension.sendMessage({}, function(response) {
 		canvas.width = $document.width();
 		canvas.style.backgroundColor = 'transparent';
 		canvas.style.position = 'absolute';
-		canvas.style.zIndex = 9001;
+		canvas.style.zIndex = 2147483647;
 		canvas.style.cursor = 'crosshair';
 		// initially canvas is display: none
 		canvas.style.display = 'none';
@@ -29,11 +29,16 @@ chrome.extension.sendMessage({}, function(response) {
 
 // toggle visibility of canvas on page action press
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
-	if(request.data === 'DisplayBlock') {
-		canvas.style.display = 'block';
+	var display = canvas.style.display;
+
+	if(request.data === 'DisplayToggle') {
+		if(display === 'block')
+			canvas.style.display = 'none';
+		else if(display === 'none')
+			canvas.style.display = 'block';
 		sendResponse();
-	} else if(request.data === 'DisplayNone') {
-		canvas.style.display = 'none';
+	} else if(request.data === 'Clear') {
+		clear();
 		sendResponse();
 	}
 });
@@ -42,6 +47,19 @@ var clickX = [];
 var clickY = [];
 var clickDrag = [];
 var paint;
+
+function clear() {
+	context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+	
+	// reset all variables
+	clickX = [];
+	clickY = [];
+	clickDrag = [];
+	paint = undefined;
+
+	// reset localStorage
+	store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag});
+}
 
 function redraw() {
 	//context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
@@ -116,6 +134,24 @@ function initCanvasEvents() {
 	
 	$canvas.mouseleave(function(e){
 		paint = false;
-		store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag});
+		//store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag});
+	});
+
+	// ctrlkey down
+	$(document).keydown(function(e) {
+		if(e.keyCode === 17 || e.which === 17) {
+			canvas.style.pointerEvents = 'none';
+			canvas.style.cursor = 'auto';
+			e.preventDefault();
+		}
+	});
+
+	// ctrlkey up
+	$(document).keyup(function(e) {
+		if(e.keyCode === 17 || e.which === 17) {
+			canvas.style.pointerEvents = 'all';
+			canvas.style.cursor = 'crosshair';
+			e.preventDefault();
+		}
 	});
 }

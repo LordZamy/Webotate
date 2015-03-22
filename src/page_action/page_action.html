@@ -1,17 +1,30 @@
 <!doctype html>
-<style type="text/css">
-	#mainPopup {
-		padding: 10px;
-		height: 200px;
-		width: 400px;
-		font-family: Helvetica, Ubuntu, Arial, sans-serif;
-	}
-	h1 {
-		font-size: 2em;
-	}
-</style>
+<html>
+<head>
+	<title>Webotate</title>
+	<style type="text/css">
+		html, body {
+			background-color: #EFEFEF;
 
-<div id="mainPopup">
-<h1>Hello extensionizr!</h1>
-<p>To shut this popup down, edit the manifest file and remove the "default popup" key. To edit it, just edit ext/page_action/page_action.html. The CSS is there, too.</p>
-</div>
+		}
+		h1 {
+			font-family: 'DejaVu Sans', Arial, sans-serif;
+			font-weight: 100;
+			font-size: 1.1em;
+			color: #3b3b3b;
+		}
+		button {
+			width: 100%;
+			font-family: verdana, sans-serif;
+			margin-bottom: 0.5em;
+		}
+	</style>
+</head>
+<body>
+	<h1>Webotate</h1>
+	<button id="toggle-state">Toggle</button>
+	<button id="clear">Clear</button>
+	<script src="../inject/jquery-2.1.3.js"></script>
+	<script src="../../js/popup.js"></script>
+</body>
+</html>
