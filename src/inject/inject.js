@@ -31,9 +31,11 @@ var clickX = [];
 var clickY = [];
 var clickDrag = [];
 var clickColor = [];
+var clickSize = [];
 var paint;
-var colorOrange = '#df4b26', colorBlack = '#000000', colorGreen = '#659b41', colorPurple = '#cb3594';
+var colorOrange = '#df4b26', colorBlack = '#000000', colorGreen = '#659b41', colorPurple = '#cb3594', colorTransparent = '#2a2a2a'; // colorTransparent must be unique
 var curColor = colorOrange;
+var curSize = 5;
 
 // toggle visibility of canvas on page action press
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
@@ -50,15 +52,28 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 		sendResponse();
 	} else if(request.data === 'ColorOrange') {
 		curColor = colorOrange;
+		context.globalCompositeOperation = 'source-over';
+		curSize = 5;
 		sendResponse();
 	} else if(request.data === 'ColorBlack') {
 		curColor = colorBlack;
+		context.globalCompositeOperation = 'source-over';
+		curSize = 5;
 		sendResponse();
 	} else if(request.data === 'ColorGreen') {
 		curColor = colorGreen;
+		context.globalCompositeOperation = 'source-over';
+		curSize = 5;
 		sendResponse();
 	} else if(request.data === 'ColorPurple') {
 		curColor = colorPurple;
+		context.globalCompositeOperation = 'source-over';
+		curSize = 5;
+		sendResponse();
+	} else if(request.data === 'Erase') {
+		curColor = colorTransparent;
+		context.globalCompositeOperation = 'destination-out';
+		curSize = 20;
 		sendResponse();
 	}
 });
@@ -71,6 +86,7 @@ function clear() {
 	clickY = [];
 	clickDrag = [];
 	clickColor = [];
+	clickSize = [];
 	paint = undefined;
 
 	// reset localStorage
@@ -79,7 +95,10 @@ function clear() {
 
 function redraw() {
 	//context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
-	for(var i = 0; i < clickX.length; i++) {	
+	console.log(clickSize);
+	for(var i = 0; i < clickX.length; i++) {
+		if(clickColor[i] === colorTransparent) context.globalCompositeOperation = 'destination-out';
+		else context.globalCompositeOperation = 'source-over';
 		context.beginPath();
 		if(clickDrag[i] && i){
 			context.moveTo(clickX[i-1], clickY[i-1]);
@@ -89,6 +108,7 @@ function redraw() {
 		context.lineTo(clickX[i], clickY[i]);
 		context.closePath();
 		context.strokeStyle = clickColor[i];
+		context.lineWidth = clickSize[i];
 		context.stroke();
 	}
 }
@@ -102,6 +122,7 @@ function draw() {
 	context.lineTo(clickX[clickX.length - 1], clickY[clickY.length - 1]);
 	context.closePath();
 	context.strokeStyle = curColor;
+	context.lineWidth = curSize;
 	context.stroke();
 }
 
@@ -111,6 +132,7 @@ function addClick(x, y, dragging)
 	clickY.push(y);
 	clickDrag.push(dragging);
 	clickColor.push(curColor);
+	clickSize.push(curSize);
 }
 
 function initCanvasEvents() {
@@ -119,7 +141,6 @@ function initCanvasEvents() {
 	// init canvas styles
 	context.lineJoin = 'round';
 	context.lineCap = 'round';
-	context.lineWidth = 5;
 
 	// draw any annotations stored in localStorage
 	var drawObj = store.get(location.href);
@@ -128,6 +149,7 @@ function initCanvasEvents() {
 		clickY = drawObj.clickY;
 		clickDrag = drawObj.clickDrag;
 		clickColor = drawObj.clickColor;
+		clickSize = drawObj.clickSize;
 		redraw();
 	}
 
@@ -145,13 +167,14 @@ function initCanvasEvents() {
 			addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
 			context.lineTo(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
 			context.strokeStyle = curColor;
+			context.lineWidth = curSize;
 			context.stroke();
 		}
 	});
 	
 	$canvas.mouseup(function(e){
 		paint = false;
-		store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag, clickColor: clickColor});
+		store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag, clickColor: clickColor, clickSize: clickSize});
 	});
 	
 	$canvas.mouseleave(function(e){
