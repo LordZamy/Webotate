@@ -27,6 +27,14 @@ chrome.extension.sendMessage({}, function(response) {
 	}, 10);
 });
 
+var clickX = [];
+var clickY = [];
+var clickDrag = [];
+var clickColor = [];
+var paint;
+var colorOrange = '#df4b26', colorBlack = '#000000', colorGreen = '#659b41', colorPurple = '#cb3594';
+var curColor = colorOrange;
+
 // toggle visibility of canvas on page action press
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	var display = canvas.style.display;
@@ -40,13 +48,20 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	} else if(request.data === 'Clear') {
 		clear();
 		sendResponse();
+	} else if(request.data === 'ColorOrange') {
+		curColor = colorOrange;
+		sendResponse();
+	} else if(request.data === 'ColorBlack') {
+		curColor = colorBlack;
+		sendResponse();
+	} else if(request.data === 'ColorGreen') {
+		curColor = colorGreen;
+		sendResponse();
+	} else if(request.data === 'ColorPurple') {
+		curColor = colorPurple;
+		sendResponse();
 	}
 });
-
-var clickX = [];
-var clickY = [];
-var clickDrag = [];
-var paint;
 
 function clear() {
 	context.clearRect(0, 0, context.canvas.width, context.canvas.height);
@@ -55,10 +70,11 @@ function clear() {
 	clickX = [];
 	clickY = [];
 	clickDrag = [];
+	clickColor = [];
 	paint = undefined;
 
 	// reset localStorage
-	store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag});
+	store.remove(location.href);
 }
 
 function redraw() {
@@ -72,16 +88,20 @@ function redraw() {
 		}
 		context.lineTo(clickX[i], clickY[i]);
 		context.closePath();
+		context.strokeStyle = clickColor[i];
 		context.stroke();
 	}
 }
 
 function draw() {
+	context.beginPath();
 	if(clickDrag[clickX.length - 1])
 		context.moveTo(clickX[clickX.length - 2], clickY[clickY.length - 2]);
 	else
 		context.moveTo(clickX[clickX.length - 1] - 1, clickY[clickY.length - 1]);
 	context.lineTo(clickX[clickX.length - 1], clickY[clickY.length - 1]);
+	context.closePath();
+	context.strokeStyle = curColor;
 	context.stroke();
 }
 
@@ -90,13 +110,13 @@ function addClick(x, y, dragging)
 	clickX.push(x);
 	clickY.push(y);
 	clickDrag.push(dragging);
+	clickColor.push(curColor);
 }
 
 function initCanvasEvents() {
 	var $canvas = $(canvas);
 
 	// init canvas styles
-	context.strokeStyle = '#df4b26';
 	context.lineJoin = 'round';
 	context.lineCap = 'round';
 	context.lineWidth = 5;
@@ -107,6 +127,7 @@ function initCanvasEvents() {
 		clickX = drawObj.clickX;
 		clickY = drawObj.clickY;
 		clickDrag = drawObj.clickDrag;
+		clickColor = drawObj.clickColor;
 		redraw();
 	}
 
@@ -123,13 +144,14 @@ function initCanvasEvents() {
 		if(paint){
 			addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
 			context.lineTo(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+			context.strokeStyle = curColor;
 			context.stroke();
 		}
 	});
 	
 	$canvas.mouseup(function(e){
 		paint = false;
-		store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag});
+		store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag, clickColor: clickColor});
 	});
 	
 	$canvas.mouseleave(function(e){
