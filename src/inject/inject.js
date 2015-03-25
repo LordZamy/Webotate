@@ -179,11 +179,11 @@ function initCanvasEvents() {
 	
 	$canvas.mouseleave(function(e){
 		paint = false;
-		//store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag});
+		//store.set(location.href, {clickX: clickX, clickY: clickY, clickDrag: clickDrag, clickColor: clickColor, clickSize: clickSize});
 	});
 
 	// ctrlkey down
-	$(document).keydown(function(e) {
+	$document.keydown(function(e) {
 		if(e.keyCode === 17 || e.which === 17) {
 			canvas.style.pointerEvents = 'none';
 			canvas.style.cursor = 'auto';
@@ -192,7 +192,7 @@ function initCanvasEvents() {
 	});
 
 	// ctrlkey up
-	$(document).keyup(function(e) {
+	$document.keyup(function(e) {
 		if(e.keyCode === 17 || e.which === 17) {
 			canvas.style.pointerEvents = 'all';
 			canvas.style.cursor = 'crosshair';
